@@ -13,22 +13,35 @@ function App(props) {
     const [isAuthenticating, setIsAuthenticating] = useState(true);
 
     useEffect(() => {
-        onLoad();
-    }, []);
+        async function onLoad() {
+            try {
+                await Auth.currentSession();
+                if (currentUser !== null) {
+                    userHasAuthenticated(true);
+                }
+            } catch (e) {
+                if (e !== "No current user") {
+                    alert(e);
+                }
+            }
 
-    async function onLoad() {
+            setIsAuthenticating(false);
+        }
+        onLoad();
+    }, [currentUser]);
+
+    useEffect(() => {
+        getSetUser();
+    }, [isAuthenticated]);
+
+    async function getSetUser() {
         try {
-            await Auth.currentSession();
             const user = await Auth.currentAuthenticatedUser();
             setCurrentUser(user);
             userHasAuthenticated(true);
         } catch (e) {
-            if (e !== "No current user") {
-                alert(e);
-            }
+            console.error(e);
         }
-
-        setIsAuthenticating(false);
     }
 
     async function signOut() {
